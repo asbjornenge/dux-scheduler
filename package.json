@@ -20,5 +20,9 @@
   "bugs": {
     "url": "https://github.com/asbjornenge/dux-scheduler/issues"
   },
-  "homepage": "https://github.com/asbjornenge/dux-scheduler"
+  "homepage": "https://github.com/asbjornenge/dux-scheduler",
+  "dependencies": {
+    "cccf": "^3.2.1",
+    "faye": "^1.1.0"
+  }
 }
