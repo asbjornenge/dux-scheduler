@@ -1,15 +1,19 @@
-var faye = require('faye')
+var faye  = require('faye')
+var retry = require('retry-connection')
 
 // TODO: modularize that dispatcher-connection that statestore has
 
 console.log('gettings started')
 
-var fclient = new faye.Client('http://dux-dispatcher.dux.test:8000/')
-
-fclient.subscribe('/hosts', function(hosts) {
-    console.log('GOT SOME HOSTS', hosts)
+var conn = retry({ 
+    host     : 'dux-dispatcher.dux.test', 
+    port     : 8000,
+    interval : 5000 
 })
-
-fclient.subscribe('/containers', function(containers) {
-    console.log('GOT SOME CONTAINERS', containers)
+conn.on('ready', function() {
+    console.log('ready')
 })
+conn.on('issue', function(issue) {
+    console.log(issue)
+})
+conn.connect()

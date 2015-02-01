@@ -24,6 +24,7 @@
   "dependencies": {
     "cccf": "^3.2.1",
     "dowding": "^0.1.1",
-    "faye": "^1.1.0"
+    "faye": "^1.1.0",
+    "retry-connection": "^1.0.1"
   }
 }
