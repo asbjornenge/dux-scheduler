@@ -25,6 +25,8 @@
     "cccf": "^3.2.1",
     "dowding": "^0.1.1",
     "faye": "^1.1.0",
+    "minimist": "^1.1.0",
+    "object.assign": "^1.1.1",
     "retry-connection": "^1.0.1"
   }
 }

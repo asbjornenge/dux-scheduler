@@ -1,19 +1,18 @@
-var faye  = require('faye')
-var retry = require('retry-connection')
-
-// TODO: modularize that dispatcher-connection that statestore has
-
-console.log('gettings started')
-
-var conn = retry({ 
-    host     : 'dux-dispatcher.dux.test', 
-    port     : 8000,
-    interval : 5000 
+#!/usr/bin/env node
+var argv = require('minimist')(process.argv.slice(2), {
+    default : {
+        'dispatcher-host' : process.env['DISPATCHER_HOST'],
+        'dispatcher-port' : process.env['DISPATCHER_PORT'],
+        'retry-timeout'   : 500,
+        'retry-interval'  : 5000
+    }
 })
-conn.on('ready', function() {
+
+var dispatcher = require('./dispatcher-connection')(argv)
+dispatcher.on('up', function() {
     console.log('ready')
 })
-conn.on('issue', function(issue) {
-    console.log(issue)
+dispatcher.on('down', function() {
+    console.log('broken')
 })
-conn.connect()
+dispatcher.listen()
