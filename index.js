@@ -21,15 +21,16 @@ var state = {
 // Mutators
 
 var dispatcher = require('./dispatcher-connection')(argv)
-//var scheduler  = require('./scheduler')
+var cluster    = require('./cluster')
 
 // Init
 
 setInterval(function() {
-    console.log(state)
     if (!state.hosts_ready || !state.containers_ready) return
     console.log('applying state')
-//    var current_state = query(state)
+    cluster(state.hosts).query(function(err, containers) {
+        containers.forEach(function(c) { console.log(c.id) })
+    })
 //    scheduler.apply(state, current)
 }, argv['apply-interval'])
 
