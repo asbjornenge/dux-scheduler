@@ -1,7 +1,7 @@
-var assign = Object.assign || require('object.assign')
-var faye   = require('faye')
-var retry  = require('retry-connection')
-var EE     = require('events').EventEmitter
+var assign  = Object.assign || require('object.assign')
+var faye    = require('faye')
+var retry   = require('retry-connection')
+var EE      = require('events').EventEmitter
 
 var DispatcherConnection = function(options) {
     this.ready    = false
@@ -28,7 +28,7 @@ DispatcherConnection.prototype =  assign({
     handleReady : function() {
         if (this.ready) return
         this.ready  = true
-        this.client = new faye.Client('http://'+this.host+':'+this.port)
+        this.client = new faye.Client(this.getURI())
         this.emit('up')
     },
 
@@ -38,6 +38,14 @@ DispatcherConnection.prototype =  assign({
         this.ready  = false
         this.client = null 
         this.emit('down')
+    },
+
+    getURI : function() {
+        return 'http://'+this.host+':'+this.port
+    },
+
+    subscribe : function(state, fn) {
+        this.client.subscribe(state, fn)
     }
 
 }, EE.prototype)
