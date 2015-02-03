@@ -25,7 +25,7 @@ var state = {
 // Integrators 
 
 var dispatcher = require('dux-dispatcher-connection')(argv)
-var statestore = require('./statestore-api')(argv)
+var statestore = require('dux-statestore-api-client')(argv)
 var cluster    = require('./cluster')
 var scheduler  = require('./scheduler')
 

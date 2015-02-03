@@ -30,7 +30,7 @@
     "clone": "^0.2.0",
     "dockers-ps": "^1.0.0",
     "dux-dispatcher-connection": "^1.0.0",
-    "minimist": "^1.1.0",
-    "request": "^2.52.0"
+    "dux-statestore-api-client": "^1.0.0",
+    "minimist": "^1.1.0"
   }
 }
