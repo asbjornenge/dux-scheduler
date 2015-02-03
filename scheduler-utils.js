@@ -1,5 +1,6 @@
 var cccf  = require('cccf')
 var clone = require('clone')
+var cdi   = require('cccf-docker-instructions')
 
 var utils = {
 
