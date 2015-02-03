@@ -8,6 +8,7 @@ var chpr  = require('child_process')
 
 var scheduler = {
 
+    // TODO: Move most of these to scheduler-utils ?
     removeIgnored : function(container) {
         return this.ignore.indexOf(container.id) < 0
     },
