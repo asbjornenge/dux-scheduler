@@ -24,8 +24,23 @@ var scheduler = {
         })[0].docker
     },
 
-    applyHost : function(instruction, hosts) {
+    pickCurrentContainer : function(id, current_containers) {
+        return current_containers.filter(function(c) {
+            return c.id == id
+        })[0]
+    },
 
+    leastBusyHost : function(containersWithHost, hosts) {
+        var weights = containersWithHost.reduce(function(map, container) {
+            if (!map[container.id]) map[container.id] = 1
+            else map[container.id] += 1
+            return map
+        },{})
+        return hosts.reduce(function(curr, next) {
+            var curr_weight = weights[curr.id] || 0
+            var next_weight = weights[next.id] || 0
+            return (next_weight > curr_weight) ? next : curr
+        }, hosts[0])
     },
 
     addHostToInstruction : function(instruction, host) {
@@ -36,10 +51,9 @@ var scheduler = {
 
     runInstructions : function(container) {
         var c = clone(container)
-        var host = c.host
         delete c.scale
         delete c.host
-        return scheduler.addHostToInstruction(cdi.run(c)[0], host) 
+        return cdi.run(c)[0]
     },
 
     exec : function(instruction, callback) {
@@ -54,21 +68,32 @@ var scheduler = {
     },
 
     apply : function(state, current_containers) {
-        console.log('apply')
         var ignored = scheduler.removeIgnored.bind({ignore:state['containers_ignore']})
         var valid   = scheduler.validateContainer
 
         current_containers   = scale.up(current_containers.filter(ignored).filter(valid))
         var state_containers = scale.up(state.containers.filter(ignored).filter(valid))
         var diff             = cdiff(current_containers, state_containers)
-        diff.add             = chost(diff.add, state.hosts.map(function(host) { return 'tcp://'+host.docker }))
+        var postRunWithHost  = clone(diff.keep).map(function(container) { 
+            container.host = scheduler.pickCurrentContainer(container.id, current_containers).host
+            return container
+        })
+        var addWithHost      = clone(diff.add).map(function(container) {
+            var host = scheduler.leastBusyHost(postRunWithHost, state.hosts)
+            console.log('least busy', host)
+            container.host = host
+            postRunWithHost = postRunWithHost.concat(clone(container))
+            return container
+        })
 
         console.log(diff)
 
         // Add
 
-        var instructions = diff.add.map(scheduler.runInstructions) 
-        instructions.forEach(scheduler.exec)
+        addWithHost.forEach(function(container) {
+            var run = scheduler.addHostToInstruction(scheduler.runInstructions(container), container.host.docker)
+            scheduler.exec(run) 
+        }) 
 
         // Remove
 
