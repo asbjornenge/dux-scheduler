@@ -29,11 +29,8 @@
     "cccf-scale": "^2.0.0",
     "clone": "^0.2.0",
     "dockers-ps": "^1.0.0",
-    "dowding": "^0.1.1",
-    "faye": "^1.1.0",
+    "dux-dispatcher-connection": "^1.0.0",
     "minimist": "^1.1.0",
-    "object.assign": "^1.1.1",
-    "request": "^2.52.0",
-    "retry-connection": "^1.0.1"
+    "request": "^2.52.0"
   }
 }
