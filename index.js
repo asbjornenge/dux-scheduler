@@ -7,7 +7,7 @@ var argv = require('minimist')(process.argv.slice(2), {
         'statestore-port'   : process.env['STATESTORE_PORT'],
         'retry-timeout'     : 500,
         'retry-interval'    : 5000,
-        'apply-interval'    : 30000,
+        'apply-interval'    : 15000,
         'containers-ignore' : ['statestore', 'dispatcher', 'rainbow-dock', 'rainbow-dock-populator','scheduler']
     }
 })
