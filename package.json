@@ -23,6 +23,7 @@
   "homepage": "https://github.com/asbjornenge/dux-scheduler",
   "dependencies": {
     "cccf": "^3.2.1",
+    "cccf-diff": "^2.0.1",
     "dockers-ps": "^1.0.0",
     "dowding": "^0.1.1",
     "faye": "^1.1.0",

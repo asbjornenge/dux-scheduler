@@ -1,43 +1,47 @@
 #!/usr/bin/env node
 var argv = require('minimist')(process.argv.slice(2), {
     default : {
-        'dispatcher-host' : process.env['DISPATCHER_HOST'],
-        'dispatcher-port' : process.env['DISPATCHER_PORT'],
-        'statestore-host' : process.env['STATESTORE_HOST'],
-        'statestore-port' : process.env['STATESTORE_PORT'],
-        'retry-timeout'   : 500,
-        'retry-interval'  : 5000,
-        'apply-interval'  : 5000
+        'dispatcher-host'   : process.env['DISPATCHER_HOST'],
+        'dispatcher-port'   : process.env['DISPATCHER_PORT'],
+        'statestore-host'   : process.env['STATESTORE_HOST'],
+        'statestore-port'   : process.env['STATESTORE_PORT'],
+        'retry-timeout'     : 500,
+        'retry-interval'    : 5000,
+        'apply-interval'    : 30000,
+        'containers-ignore' : ['statestore', 'dispatcher', 'rainbow-dock', 'rainbow-dock-populator','scheduler']
     }
 })
 
 // State
 
 var state = {
-    hosts            : [],
-    containers       : [],
-    hosts_ready      : false,
-    containers_ready : false
+    hosts             : [],
+    containers        : [],
+    containers_ignore : argv['containers-ignore'] || [],
+    hosts_ready       : false,
+    containers_ready  : false
 }
 
-// Mutators
+// Integrators 
 
 var dispatcher = require('./dispatcher-connection')(argv)
 var statestore = require('./statestore-api')(argv)
 var cluster    = require('./cluster')
+var scheduler  = require('./scheduler')
 
-// Interval
+// Application
 
 setInterval(function() {
-    if (!state.hosts_ready || !state.containers_ready) return
-    console.log('Applying state\n-----------')
-    cluster(state.hosts).query(function(err, containers) {
-        console.log(containers)
-//        containers.forEach(function(c) { console.log(c.id) })
-        console.log('-----------')
-    })
-//    scheduler.apply(state, current)
+    apply()
 }, argv['apply-interval'])
+
+var apply = function() {
+    if (!state.hosts_ready || !state.containers_ready) return
+    cluster(state.hosts).query(function(err, current_containers) {
+        if (err) { console.log(err); return }
+        scheduler.apply(state, current_containers)
+    })
+}
 
 // Functions
 
@@ -55,11 +59,13 @@ dispatcher.on('up', function() {
     statestore.getState('/hosts', function(err, hosts) {
         if (err) { console.log(err); return }
         updateHosts(hosts)
+        apply()
     })
     dispatcher.subscribe('/hosts', updateHosts)
     statestore.getState('/containers', function(err, containers) {
         if (err) { console.log(err); return }
         updateContainers(containers)
+        apply()
     })
     dispatcher.subscribe('/containers', updateContainers)
 })
