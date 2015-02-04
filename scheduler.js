@@ -44,7 +44,7 @@ var scheduler = {
 
         addWithHost.forEach(function(container) {
             container.host = container.host.docker
-            var run = cdi.run(container, ['scale'])[0]
+            var run = cdi.run(container, { exclude : ['scale'] })[0]
             scheduler.exec(run) 
         }) 
 
