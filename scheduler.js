@@ -44,7 +44,6 @@ var scheduler = {
 
         addWithHost.forEach(function(container) {
             container.host = container.host.docker
-            console.log(container)
             var run = cdi.run(container, ['scale'])[0]
             scheduler.exec(run) 
         }) 
@@ -53,7 +52,6 @@ var scheduler = {
 
         diff.remove.forEach(function(container) {
             container.host = utils.pickHost(container.host, state).docker
-            console.log(container)
             var kill = cdi.kill(container)[0]
             var rm   = cdi.rm(container)[0]
             scheduler.exec(kill, function() {
