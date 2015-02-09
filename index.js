@@ -17,56 +17,48 @@ var argv = require('minimist')(process.argv.slice(2), {
 var state = {
     hosts             : [],
     containers        : [],
-    containers_ignore : argv['containers-ignore'] || [],
-    hosts_ready       : false,
-    containers_ready  : false
+    containers_ignore : argv['containers-ignore'] || []
 }
 
 // Integrators 
 
-var dispatcher = require('dux-dispatcher-connection')(argv)
-var statestore = require('dux-statestore-api-client')(argv)
+var ddsc = require('dux-dispatcher-statestore-connection')({
+    dispatcher : {
+        host : argv['dispatcher-host'],
+        port : argv['dispatcher-port']
+    },
+    statestore : {
+        host : argv['statestore-host'],
+        port : argv['statestore-port']
+    },
+    timeout  : argv['retry-timeout'],
+    interval : argv['retry-interval']
+})
 var cluster    = require('./cluster')
 var scheduler  = require('./scheduler')
 
 // Application
 
-setInterval(function() {
-    apply()
-}, argv['apply-interval'])
-
 var apply = function() {
-    if (!state.hosts_ready || !state.containers_ready) return
+    if (state.hosts.length == 0 || state.containers.length == 0) return
     cluster(state.hosts).query(function(err, current_containers) {
         if (err) { console.log(err); return }
         scheduler.apply(state, current_containers)
     })
 }
 
-// Functions
+setInterval(function() {
+    apply()
+}, argv['apply-interval'])
 
-var updateHosts = function(hosts) {
-    state.hosts       = hosts
-    state.hosts_ready = true
-}
-var updateContainers = function(containers) {
-    state.containers       = containers
-    state.containers_ready = true
-}
+// Listen 
 
-dispatcher.on('up', function() {
-    console.log('dispatcher up')
-    statestore.getState('/hosts', function(err, hosts) {
-        if (err) { console.log(err); return }
-        updateHosts(hosts)
-        apply()
-    })
-    dispatcher.subscribe('/state/hosts', updateHosts)
-    statestore.getState('/containers', function(err, containers) {
-        if (err) { console.log(err); return }
-        updateContainers(containers)
-        apply()
-    })
-    dispatcher.subscribe('/state/containers', updateContainers)
+ddsc.on('/state/containers', function(err, containers) {
+    if (err) { console.error(err); return }
+    state.containers = containers
 })
-dispatcher.listen()
+ddsc.on('/state/hosts', function(err, hosts) {
+    if (err) { console.error(err); return }
+    state.hosts = hosts
+})
+ddsc.start()
