@@ -61,12 +61,12 @@ dispatcher.on('up', function() {
         updateHosts(hosts)
         apply()
     })
-    dispatcher.subscribe('/hosts', updateHosts)
+    dispatcher.subscribe('/state/hosts', updateHosts)
     statestore.getState('/containers', function(err, containers) {
         if (err) { console.log(err); return }
         updateContainers(containers)
         apply()
     })
-    dispatcher.subscribe('/containers', updateContainers)
+    dispatcher.subscribe('/state/containers', updateContainers)
 })
 dispatcher.listen()
