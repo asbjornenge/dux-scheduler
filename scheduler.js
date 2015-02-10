@@ -4,7 +4,6 @@ var scale   = require('cccf-scale')
 var chost   = require('cccf-host-basic')
 var cdi     = require('cccf-docker-instructions')
 var clone   = require('clone')
-var chalk   = require('chalk')
 var chpr    = require('child_process')
 var utils   = require('./scheduler-utils')
 
@@ -14,11 +13,7 @@ var scheduler = {
     working_timer : null,
 
     exec : function(instruction, callback) {
-        var color = chalk.magenta
-        if (instruction.indexOf(' run ') > 0) color = chalk.green
-        if (instruction.indexOf(' kill ') > 0) color = chalk.yellow
-        if (instruction.indexOf(' stop ') > 0) color = chalk.yellow
-        if (instruction.indexOf(' rm ') > 0) color = chalk.red
+        var color = utils.pickInstructionColor(instruction) 
         var child = chpr.exec(instruction)
         child.stdout.on('data', function(data) { process.stdout.write(color(data)) })
         child.stderr.on('data', function(data) { process.stderr.write(data) })
@@ -64,15 +59,16 @@ var scheduler = {
         // Add
 
         addWithHost.forEach(function(container) {
-            container.host = container.host.docker
+            container.host = utils.stringifyHost(container.host)
             var run = cdi.run(container, { exclude : ['scale'] })[0]
+            console.log(run)
             scheduler.exec(run, finish_checker) 
         }) 
 
         // Remove
 
         diff.remove.forEach(function(container) {
-            container.host = utils.pickHost(container.host, state).docker
+            container.host = utils.stringifyHost(utils.pickHostByName(container.host, state.hosts))
             var kill = cdi.kill(container)[0]
             var rm   = cdi.rm(container)[0]
             scheduler.exec(kill, function() {

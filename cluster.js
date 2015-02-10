@@ -2,8 +2,8 @@ var dockersps = require('dockers-ps')
 
 var Cluster = function(hosts) {
     this.cluster = dockersps(function(done) {
-        return done(null, hosts)
-    })
+        return done(null, hosts.map(this.formatHost))
+    }.bind(this))
 }
 Cluster.prototype = {
     query : function(callback) {
@@ -21,6 +21,12 @@ Cluster.prototype = {
             })
             callback(err, filtered)
         })
+    },
+    formatHost : function(host) {
+        return {
+            docker   : host.host+':'+host.port,
+            hostname : host.name
+        }
     }
 }
 

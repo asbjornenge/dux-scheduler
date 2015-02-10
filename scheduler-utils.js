@@ -1,5 +1,6 @@
 var cccf  = require('cccf')
 var clone = require('clone')
+var chalk = require('chalk')
 var cdi   = require('cccf-docker-instructions')
 
 var utils = {
@@ -11,13 +12,18 @@ var utils = {
     // TODO: Write to stderr in case of error ?
     validateContainer : function(container) {
         try      { cccf.validate(container); return true }
-        catch(e) { console.log(e); return false }
+        catch(e) { process.stderr.write(e); return false }
     },
 
-    pickHost : function(hostname, state) {
-        return state.hosts.filter(function(host) {
-            return host.hostname == hostname
+    pickHostByName : function(name, hosts) {
+        return hosts.filter(function(host) {
+            return host.name == name
         })[0]
+    },
+
+    stringifyHost : function(host) {
+        var protocol = host.protocol || 'tcp'
+        return protocol+'://'+host.host+':'+host.port
     },
 
     pickCurrentContainer : function(id, current_containers) {
@@ -38,6 +44,15 @@ var utils = {
             return (next_weight > curr_weight) ? next : curr
         }, hosts[0])
     },
+
+    pickInstructionColor : function(instruction) {
+        var color = chalk.magenta
+        if (instruction.indexOf(' run ') > 0) color = chalk.green
+        if (instruction.indexOf(' kill ') > 0) color = chalk.yellow
+        if (instruction.indexOf(' stop ') > 0) color = chalk.yellow
+        if (instruction.indexOf(' rm ') > 0) color = chalk.red
+        return color
+    }
 
 }
 
