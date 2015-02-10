@@ -4,6 +4,7 @@ var scale   = require('cccf-scale')
 var chost   = require('cccf-host-basic')
 var cdi     = require('cccf-docker-instructions')
 var clone   = require('clone')
+var path    = require('path')
 var chpr    = require('child_process')
 var utils   = require('./scheduler-utils')
 
@@ -59,9 +60,10 @@ var scheduler = {
         // Add
 
         addWithHost.forEach(function(container) {
-            utils.queryHostVersion(container.host, function(version, path) {
+            utils.queryHostVersion(container.host, function(version, _path) {
                 container.host = utils.stringifyHost(container.host)
-                var run = cdi.run(container, { exclude : ['scale'] })[0].replace('docker',path)
+                var __path     = path.resolve(__dirname,_path)
+                var run        = cdi.run(container, { exclude : ['scale'] })[0].replace('docker', __path)
                 scheduler.exec(run, finish_checker) 
             }) 
         }) 
@@ -70,10 +72,11 @@ var scheduler = {
 
         diff.remove.forEach(function(container) {
             var host = utils.pickHostByName(container.host, state.hosts) 
-            utils.queryHostVersion(host, function(version, path) {
+            utils.queryHostVersion(host, function(version, _path) {
                 container.host = utils.stringifyHost(host)
-                var kill = cdi.kill(container)[0].replace('docker',path)
-                var rm   = cdi.rm(container)[0].replace('docker',path)
+                var __path     = path.resolve(__dirname,_path)
+                var kill       = cdi.kill(container)[0].replace('docker', __path)
+                var rm         = cdi.rm(container)[0].replace('docker', __path)
                 scheduler.exec(kill, function() {
                     scheduler.exec(rm, finish_checker) 
                 }) 
