@@ -59,20 +59,25 @@ var scheduler = {
         // Add
 
         addWithHost.forEach(function(container) {
-            container.host = utils.stringifyHost(container.host)
-            var run = cdi.run(container, { exclude : ['scale'] })[0]
-            scheduler.exec(run, finish_checker) 
+            utils.queryHostVersion(container.host, function(version, path) {
+                container.host = utils.stringifyHost(container.host)
+                var run = cdi.run(container, { exclude : ['scale'] })[0].replace('docker',path)
+                scheduler.exec(run, finish_checker) 
+            }) 
         }) 
 
         // Remove
 
         diff.remove.forEach(function(container) {
-            container.host = utils.stringifyHost(utils.pickHostByName(container.host, state.hosts))
-            var kill = cdi.kill(container)[0]
-            var rm   = cdi.rm(container)[0]
-            scheduler.exec(kill, function() {
-                scheduler.exec(rm, finish_checker) 
-            }) 
+            var host = utils.pickHostByName(container.host, state.hosts) 
+            utils.queryHostVersion(host, function(version, path) {
+                container.host = utils.stringifyHost(host)
+                var kill = cdi.kill(container)[0].replace('docker',path)
+                var rm   = cdi.rm(container)[0].replace('docker',path)
+                scheduler.exec(kill, function() {
+                    scheduler.exec(rm, finish_checker) 
+                }) 
+            })
         })
     }
 
