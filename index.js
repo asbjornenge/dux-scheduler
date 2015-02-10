@@ -20,7 +20,7 @@ var state = {
     containers_ignore : argv['containers-ignore'] || []
 }
 
-// Integrators 
+// IO 
 
 var ddsc = require('dux-dispatcher-statestore-connection')({
     dispatcher : {
@@ -37,7 +37,7 @@ var ddsc = require('dux-dispatcher-statestore-connection')({
 var cluster    = require('./cluster')
 var scheduler  = require('./scheduler')
 
-// Application
+// ApplyLoop 
 
 var apply = function() {
     if (state.hosts.length == 0 || state.containers.length == 0) return
@@ -51,14 +51,16 @@ setInterval(function() {
     apply()
 }, argv['apply-interval'])
 
-// Listen 
+// Listen for State 
 
 ddsc.on('/state/containers', function(err, containers) {
     if (err) { console.error(err); return }
     state.containers = containers
+    apply()
 })
 ddsc.on('/state/hosts', function(err, hosts) {
     if (err) { console.error(err); return }
     state.hosts = hosts
+    apply()
 })
 ddsc.start()
