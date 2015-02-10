@@ -42,7 +42,7 @@ var scheduler  = require('./scheduler')
 var apply = function() {
     if (state.hosts.length == 0 || state.containers.length == 0) return
     cluster(state.hosts).query(function(err, current_containers) {
-        if (err) { console.log(err); return }
+        if (err) { console.error(err); return }
         scheduler.apply(state, current_containers)
     })
 }
