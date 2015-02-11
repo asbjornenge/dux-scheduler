@@ -11,6 +11,7 @@ var argv = require('minimist')(process.argv.slice(2), {
         'containers-ignore' : ['statestore', 'dispatcher', 'rainbow-dock', 'rainbow-dock-populator','scheduler','scheduler']
     }
 })
+var chalk = require('chalk')
 
 // State
 
@@ -39,7 +40,9 @@ var scheduler  = require('./scheduler')
 
 // ApplyLoop 
 
+var ready = false
 var apply = function() {
+    if (!ready && ddsc.isReady()) { console.log(chalk.green('Scheduler ready :-)')); ready = true }
     if (state.hosts.length == 0 || state.containers.length == 0) return
     cluster(state.hosts).query(function(err, current_containers) {
         if (err) { console.error(err); return }
