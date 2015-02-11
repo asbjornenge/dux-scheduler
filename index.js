@@ -54,13 +54,20 @@ setInterval(function() {
 // Listen for State 
 
 ddsc.on('/state/containers', function(err, containers) {
-    if (err) { console.error(err); return }
+    if (err) { handleStateQueryError(err); return }
     state.containers = containers
     apply()
 })
 ddsc.on('/state/hosts', function(err, hosts) {
-    if (err) { console.error(err); return }
+    if (err) { handleStateQueryError(err); return }
     state.hosts = hosts
     apply()
 })
 ddsc.start()
+
+// Support Functions
+
+var handleStateQueryError = function(err) {
+    if (err.statusCode) { console.error('Bad http status code '+err.statusCode+' for '+err.request.href); return }
+    console.error(err)
+}
