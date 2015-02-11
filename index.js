@@ -44,7 +44,7 @@ var scheduler  = require('./scheduler')
 
 var ready = false
 var apply = function() {
-    if (!ready && ddsc.isReady()) { console.log(chalk.cyan(cowsay.say({ text:"I'm READY for "+silly(), w:true, W:40 }))); ready = true }
+    if (!ready && ddsc.isReady()) { console.log(chalk.cyan(cowsay.say({ text:"I'm READY for "+silly(), w:true, W:35 }))); ready = true }
     if (state.hosts.length == 0 || state.containers.length == 0) return
     cluster(state.hosts).query(function(err, current_containers) {
         if (err) { console.error(err); return }
@@ -73,6 +73,6 @@ ddsc.start()
 // Support Functions
 
 var handleStateQueryError = function(err) {
-    if (err.statusCode) { console.error('Bad http status code '+err.statusCode+' for '+err.request.href); return }
+    if (err.statusCode) { console.error(chalk.yellow('Bad http status code '+err.statusCode+' for '+err.request.href)); return }
     console.error(err)
 }
