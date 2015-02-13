@@ -34,6 +34,7 @@
     "dockers-ps": "^1.0.0",
     "dux-dispatcher-statestore-connection": "^1.1.0",
     "minimist": "^1.1.0",
+    "react": "^0.12.2",
     "request": "^2.53.0",
     "sillystring": "^0.1.2"
   }

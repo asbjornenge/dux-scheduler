@@ -11,9 +11,10 @@ var argv = require('minimist')(process.argv.slice(2), {
         'containers-ignore' : ['statestore', 'dispatcher', 'rainbow-dock', 'rainbow-dock-populator','scheduler','scheduler']
     }
 })
-var chalk  = require('chalk')
-var cowsay = require('cowsay')
-var silly  = require('sillystring')
+var chalk   = require('chalk')
+var cowsay  = require('cowsay')
+var silly   = require('sillystring')
+var DockerCluster = require('./docker-cluster')
 
 // State
 
@@ -49,6 +50,7 @@ var apply = function() {
     cluster(state.hosts).query(function(err, current_containers) {
         if (err) { console.error(err); return }
         scheduler.apply(state, current_containers)
+        React.renderToString(DockerCluster({ hosts : state.hosts, container : state.containers }))
     })
 }
 
