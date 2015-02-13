@@ -23,6 +23,7 @@
   "homepage": "https://github.com/asbjornenge/dux-scheduler",
   "dependencies": {
     "MD5": "^1.2.1",
+    "async": "^0.9.0",
     "cccf": "^3.2.1",
     "cccf-diff": "^3.0.0",
     "cccf-docker-instructions": "^3.1.0",
