@@ -6,6 +6,7 @@ var cdi     = require('cccf-docker-instructions')
 var clone   = require('clone')
 var path    = require('path')
 var chpr    = require('child_process')
+var mapper  = require('./scheduler-mapper')
 var utils   = require('./scheduler-utils')
 
 var scheduler = {
@@ -29,21 +30,14 @@ var scheduler = {
         scheduler.working_timer = setTimeout(function() {
             console.error('Scheduler has been working for a very long time.')
         }, 600000)
-        var ignored = utils.removeIgnored.bind({ignore:state['containers_ignore']})
+        var _mapper = mapper(state, current_containers) 
 
-        current_containers   = scale.up(current_containers.filter(ignored).filter(utils.validateContainer))
-        var state_containers = scale.up(state.containers.filter(ignored).filter(utils.validateContainer))
-        var diff             = cdiff(current_containers, state_containers)
-        var postRunWithHost  = clone(diff.keep).map(function(container) { 
-            container.host = utils.pickCurrentContainer(container.id, current_containers).host
-            return container
-        })
-        var addWithHost      = clone(diff.add).map(function(container) {
-            var host = utils.leastBusyHost(postRunWithHost, state.hosts)
-            container.host = host
-            postRunWithHost = postRunWithHost.concat(clone(container))
-            return container
-        })
+        unified_current_containers   = _mapper.unifyContainers(current_containers)
+        var unified_state_containers = _mapper.unifyContainers(state.containers) 
+        var diff                     = _mapper.applyHosts(cdiff(unified_current_containers, unified_state_containers))
+
+        console.log(diff)
+        process.exit(0)
 
         // Finish 
 
@@ -59,7 +53,7 @@ var scheduler = {
 
         // Add
 
-        addWithHost.forEach(function(container) {
+        diff.add.forEach(function(container) {
             utils.queryHostVersion(container.host, function(version, _path) {
                 container.host = utils.stringifyHost(container.host)
                 var __path     = path.resolve(__dirname,_path)
