@@ -11,9 +11,6 @@ var argv = require('minimist')(process.argv.slice(2), {
         'containers-ignore' : ['statestore', 'dispatcher', 'rainbow-dock', 'rainbow-dock-populator','scheduler','scheduler']
     }
 })
-var chalk  = require('chalk')
-var cowsay = require('cowsay')
-var silly  = require('sillystring')
 
 // State
 
@@ -37,41 +34,39 @@ var ddsc = require('dux-dispatcher-statestore-connection')({
     timeout  : argv['retry-timeout'],
     interval : argv['retry-interval']
 })
-var cluster    = require('./cluster')
-var scheduler  = require('./scheduler')
 
-// ApplyLoop 
+// ReadyStateManagement
 
-var ready = false
-var apply = function() {
-    if (!ready && ddsc.isReady()) { console.log(chalk.cyan(cowsay.say({ text:"I'm READY for "+silly(), w:true, W:35 }))); ready = true }
-    if (state.hosts.length == 0 || state.containers.length == 0) return
-    cluster(state.hosts).query(function(err, current_containers) {
-        if (err) { console.error(err); return }
-        scheduler.apply(state, current_containers)
-    })
-}
+var rsm = require('./ready-state')({
+    state      : state,
+    connection : ddsc,
+    cluster    : require('./cluster'),
+    scheduler  : require('./scheduler') 
+})
+
+// ApplyLoop
 
 setInterval(function() {
-    apply()
+    rsm.applyMaybe(state)
 }, argv['apply-interval'])
 
-// Listen for State 
+// Listen 
 
 ddsc.on('/state/containers', function(err, containers) {
     if (err) { handleStateQueryError(err); return }
     state.containers = containers
-    apply()
+    rsm.applyMaybe(state)
 })
 ddsc.on('/state/hosts', function(err, hosts) {
     if (err) { handleStateQueryError(err); return }
     state.hosts = hosts
-    apply()
+    rsm.applyMaybe(state)
 })
 ddsc.start()
 
 // Support Functions
 
+var chalk = require('chalk')
 var handleStateQueryError = function(err) {
     if (err.statusCode) { console.error(chalk.yellow('Bad http status code '+err.statusCode+' for '+err.request.href)); return }
     console.error(err)
