@@ -34,16 +34,16 @@ var utils = {
         })[0]
     },
 
-    leastBusyHost : function(containersWithHost, hosts) {
-        var weights = containersWithHost.reduce(function(map, container) {
-            if (!map[container.id]) map[container.id] = 1
-            else map[container.id] += 1
+    leastBusyHost : function(runningContainers, hosts) {
+        var weights = runningContainers.reduce(function(map, container) {
+            if (!map[container.host]) map[container.host] = 1
+            else map[container.host] += 1
             return map
         },{})
         return hosts.reduce(function(curr, next) {
-            var curr_weight = weights[curr.id] || 0
-            var next_weight = weights[next.id] || 0
-            return (next_weight > curr_weight) ? next : curr
+            var curr_weight = weights[curr.name] || 0
+            var next_weight = weights[next.name] || 0
+            return (next_weight > curr_weight) ? curr : next
         }, hosts[0])
     },
 
