@@ -15,7 +15,7 @@ ReadyStateManager.prototype = {
     },
     displayReadyMessage : function() {
         if (!this.ready && this.connection.isReady()) { 
-            console.log(chalk.cyan(cowsay.say({ text:"I'm READY (for "+silly()+')', w:true, W:35 })))
+            console.log(chalk.cyan(cowsay.say({ text:"I'm READY for "+silly(), w:true, W:35 })))
             this.ready = true 
         }
         return this
