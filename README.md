@@ -4,12 +4,13 @@
 
 A Scheduler for [Dux](https://github.com/asbjornenge/dux).  
 
-...add more info...
-
 ## RUN
 
     docker run -d asbjornenge/dux-scheduler
+        --dispatcher-host dux-dispatcher.lol.wtf 
+        --dispatcher-port 8000 
+        --statestore-host dux-statestore.lol.wtf 
+        --statestore-port 8000 
+        --color
 
-## Security
-
-Coming...
+enjoy
