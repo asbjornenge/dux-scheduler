@@ -7,10 +7,14 @@ A Scheduler for [Dux](https://github.com/asbjornenge/dux).
 ## RUN
 
     docker run -d asbjornenge/dux-scheduler
-        --dispatcher-host dux-dispatcher.lol.wtf 
-        --dispatcher-port 8000 
-        --statestore-host dux-statestore.lol.wtf 
-        --statestore-port 8000 
-        --color
+        --dispatcher-host dux-dispatcher.lol.wtf   // Dispatcher hostname
+        --dispatcher-port 8000                     // Dispatcher port
+        --statestore-host dux-statestore.lol.wtf   // StateStore hostname
+        --statestore-port 8000                     // StateStore port
+        --retry-timeout 500                        // Connection timeout         (optional, default 500)
+        --retry-interval 5000                      // Connection retry interval  (optional, default 5000)
+        --apply-interval 15000                     // How to run scheduler       (optional, default 15000)
+        --ignore testapp                           // Container (name) to ignore
+        --color                                    // Color output 
 
 enjoy
