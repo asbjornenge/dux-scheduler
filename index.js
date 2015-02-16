@@ -8,7 +8,7 @@ var argv = require('minimist')(process.argv.slice(2), {
         'retry-timeout'     : 500,
         'retry-interval'    : 5000,
         'apply-interval'    : 15000,
-        'containers-ignore' : ['statestore', 'dispatcher', 'rainbow-dock', 'rainbow-dock-populator','scheduler','scheduler']
+        'ignore'            : ['statestore', 'dispatcher', 'scheduler']
     }
 })
 
@@ -17,7 +17,7 @@ var argv = require('minimist')(process.argv.slice(2), {
 var state = {
     hosts             : [],
     containers        : [],
-    containers_ignore : argv['containers-ignore'] || []
+    containers_ignore : argv['ignore'] || []
 }
 
 // IO 
