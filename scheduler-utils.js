@@ -57,7 +57,8 @@ var utils = {
     },
 
     supportedDockerVersions : {
-        'stable' : './docker-1.3.0',
+        'stable' : './docker-1.3.3',
+        '1.5'    : './docker-1.5.0',
         '1.4'    : './docker-1.4.1',
         '1.3'    : './docker-1.3.3',
         '1.2'    : './docker-1.2.0',
