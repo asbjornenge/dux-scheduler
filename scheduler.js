@@ -11,16 +11,18 @@ var scheduler = {
     working       : false,
     working_timer : null,
 
+    diff : function(state_container, current_containers) {
+        var _mapper = mapper(state, current_containers) 
+        var unified_current_containers = _mapper.unifyContainers(current_containers)
+        var unified_state_containers   = _mapper.unifyContainers(state.containers) 
+        var diff                       = _mapper.applyHosts(cdiff(unified_current_containers, unified_state_containers))
+        return diff
+    },
+
     apply : function(state, current_containers) {
         if (scheduler.working) return
         scheduler.working = true
-        var _mapper = mapper(state, current_containers) 
-
-        unified_current_containers   = _mapper.unifyContainers(current_containers)
-        var unified_state_containers = _mapper.unifyContainers(state.containers) 
-        var diff                     = _mapper.applyHosts(cdiff(unified_current_containers, unified_state_containers))
-
-        scheduler.applyDiffAsync(state, diff)
+        scheduler.applyDiffAsync(state, scheduler.diff(state.containers, current_container))
     },
 
     applyDiffAsync : function(state, diff) {

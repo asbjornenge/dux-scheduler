@@ -1,32 +1,30 @@
-var dockersps = require('dockers-ps')
+var inspector = require('docker-inspector')
 
 var Cluster = function(hosts) {
-    this.cluster = dockersps(function(done) {
-        return done(null, hosts.map(this.formatHost))
-    }.bind(this))
+    this.hosts = hosts
 }
 Cluster.prototype = {
     query : function(callback) {
-        this.cluster.ps(function(err, containers) {
+        inspector({hosts:this.hosts}).inspect(function(err, containers) {
             if (err) callback(err)
-            var filtered = containers.filter(function(container) {
-                return container['Status'].indexOf('Up') == 0              
-            }).map(function(container) {
-                var names = container['Names'][1].split('@')
+            var _containers = containers.map(function(container) {
                 return {
-                    id    : names[0].slice(1),
-                    image : container['Image'],
-                    host  : names[1]
+                    id      : container.Name.slice(1),
+                    image   : container.Config.Image,
+                    cmd     : container.Config.Cmd.join(' '),
+                    ports   : Object.keys(container.HostConfig.PortBindings || {}).map(function(c_port) {
+                        var p_data = container.HostConfig.PortBindings[c_port]
+                        var h_port = p_data ? p_data[0].HostPort : c_port.split('/')[0]
+                        return h_port+':'+c_port
+                    }),
+                    env     : container.Config.Env,
+                    volumes : Object.keys(container.Volumes || {}).map(function(to) {
+                        return container.Volumes[to]+':'+to
+                    })
                 }
             })
-            callback(err, filtered)
+            callback(err, _containers)
         })
-    },
-    formatHost : function(host) {
-        return {
-            docker   : host.host+':'+host.port,
-            hostname : host.name
-        }
     }
 }
 
